@@ -1,0 +1,12 @@
+{
+    "name": "goncalomb/torrent-machine",
+    "require": {
+        "goncalomb/asbestos": "dev-master#fc419b4643e75c61c17973aecf91232a928c9f74"
+    },
+    "authors": [
+        {
+            "name": "Gonçalo Baltazar",
+            "email": "me@goncalomb.com"
+        }
+    ]
+}
