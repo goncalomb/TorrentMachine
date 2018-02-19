@@ -1,5 +1,21 @@
 (function() {
 
+  function apiFetch(url) {
+    return fetch(url).then(response => {
+      if (response.status >= 200 && response.status < 300) {
+        return response.json();
+      } else {
+        return Promise.reject(new Error(response.status + ' ' + response.statusText));
+      }
+    }).then(json => {
+      if (json.error) {
+        return Promise.reject(new Error(json.error));
+      } else {
+        return Promise.resolve(json.data);
+      }
+    });
+  }
+
   Vue.component('torrent-list', {
     props: ['torrents', 'error'],
     template: `
@@ -39,13 +55,7 @@
       },
       methods: {
         update: function() {
-          fetch('/api/list.php').then(response => {
-            if (response.status >= 200 && response.status < 300) {
-              return response.json();
-            } else {
-              return Promise.reject(new Error(response.status + ' ' + response.statusText));
-            }
-          }).then(data => {
+          apiFetch('/api/list.php').then(data => {
             this.torrents = data;
           }).catch(error => {
             this.torrents = [];

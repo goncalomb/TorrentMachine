@@ -1,7 +1,25 @@
 {
     "name": "goncalomb/torrent-machine",
+    "repositories": [
+        {
+            "type": "package",
+            "package": {
+                "name": "brycied00d/PHP-Transmission-Class",
+                "version": "dev-master",
+                "source": {
+                    "url": "https://github.com/brycied00d/PHP-Transmission-Class.git",
+                    "type": "git",
+                    "reference": "dev-master"
+                },
+                "autoload": {
+                    "files": ["class/TransmissionRPC.class.php"]
+                }
+            }
+        }
+    ],
     "require": {
-        "goncalomb/asbestos": "dev-master#fc419b4643e75c61c17973aecf91232a928c9f74"
+        "goncalomb/asbestos": "dev-master#fc419b4643e75c61c17973aecf91232a928c9f74",
+        "brycied00d/PHP-Transmission-Class": "dev-master#28f670791f85b347708f72ff9faeb4c8a93b79b0"
     },
     "authors": [
         {
