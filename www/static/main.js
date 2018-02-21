@@ -1,7 +1,17 @@
 (function() {
 
-  function apiFetch(url) {
-    return fetch(url).then(response => {
+  function apiFetch(url, data) {
+    var init = {};
+    if (data) {
+      init = {
+        method: 'POST',
+        body: $.param(data),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+    }
+    return fetch(url, init).then(response => {
       if (response.status >= 200 && response.status < 300) {
         return response.json();
       } else {
@@ -15,6 +25,58 @@
       }
     });
   }
+
+  Vue.component('torrent-add-form', {
+    template: `
+    <form @submit="submit">
+      <div :class="['alert', { 'alert-success': !messageIsError }, { 'alert-danger': messageIsError }]" v-show="message">{{ message }}</div>
+      <div class="input-group input-group-lg mb-3">
+        <input class="form-control" type="text" placeholder="Torrent URL / Magnet URL / Info Hash" v-model="url" :disabled="locked">
+        <div class="input-group-append">
+          <button class="btn btn-outline-primary" type="submit" :disabled="locked">Add</button>
+        </div>
+      </div>
+    </form>
+    `,
+    data: function() {
+      return {
+        message: null,
+        messageIsError: false,
+        messageTimeout: 0,
+        locked: false,
+        url: ''
+      }
+    },
+    methods: {
+      setMessage: function(text, isError) {
+        clearTimeout(this.messageTimeout);
+        this.message = text;
+        this.messageIsError = isError;
+        if (text && !isError) {
+          this.messageTimeout = setTimeout(() => {
+            this.message = '';
+          }, 2500);
+        }
+      },
+      submit: function(e) {
+        e.preventDefault();
+        if (this.url) {
+          this.locked = true;
+          apiFetch('/api/add.php', {
+            url: this.url
+          }).then(data => {
+            this.locked = false;
+            this.url = '';
+            this.setMessage(data, false);
+          }).catch(error => {
+            this.locked = false;
+            this.setMessage(error.message, true);
+          });
+        }
+        document.activeElement.blur();
+      }
+    }
+  });
 
   Vue.component('torrent-list', {
     props: ['torrents', 'error'],
@@ -52,6 +114,13 @@
     </table>
     `
   });
+
+  window.createTorrentAddForm = function(el) {
+    return new Vue({
+      el: el,
+      template: '<torrent-add-form></torrent-add-form>',
+    });
+  }
 
   window.createTorrentList = function(el) {
     new Vue({

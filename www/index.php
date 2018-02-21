@@ -7,6 +7,8 @@ Asbestos::startThemedPage();
 
 ?>
 
-<h2>Torrent List</h2>
+<h2>Torrrents</h2>
+<div id="torrent-add-form"></div>
+<script>window.createTorrentAddForm(document.getElementById('torrent-add-form'))</script>
 <div id="torrent-list"></div>
 <script>window.createTorrentList(document.getElementById('torrent-list'))</script>

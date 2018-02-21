@@ -5,6 +5,7 @@ use \Asbestos\Page;
 Page::title("Torrent Machine");
 
 Page::stylesheetFile('https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css');
+Page::scriptFile('https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.slim.min.js');
 Page::scriptFile('https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.min.js');
 
 Page::stylesheetFile('/static/main.css');
