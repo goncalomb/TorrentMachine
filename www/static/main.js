@@ -26,7 +26,11 @@
           <th>Size</th>
           <th>Downloaded</th>
           <th>Progress</th>
+          <th>ETA</th>
           <th>Status</th>
+          <th>Peers (U/D)</th>
+          <th>Download</th>
+          <th>Upload</th>
         </tr>
       </thead>
       <tbody>
@@ -37,8 +41,12 @@
           <td>{{ torrent.name }}</td>
           <td>{{ torrent.totalSize }}</td>
           <td>{{ torrent.haveValid }}</td>
-          <td>{{ Math.floor(torrent.haveValid*10000/torrent.totalSize)/100 }} %</td>
-          <td>{{ torrent.status }}</td>
+          <td>{{ torrent.totalSize ? Math.floor(torrent.haveValid*10000/torrent.totalSize)/100 : 0 }} %</td>
+          <td>{{ torrent.eta > 0 ? torrent.eta : 0 }}</td>
+          <td>{{ torrent.statusString }}</td>
+          <td>{{ torrent.peersConnected + '/' + torrent.maxConnectedPeers + ' (' + torrent.peersGettingFromUs + '/' + torrent.peersSendingToUs + ')' }}</td>
+          <td>{{ torrent.rateDownload }}</td>
+          <td>{{ torrent.rateUpload }}</td>
         </tr>
       </tbody>
     </table>
@@ -57,13 +65,19 @@
         update: function() {
           apiFetch('/api/list.php').then(data => {
             this.torrents = data;
+            this.error = null;
           }).catch(error => {
             this.torrents = [];
             this.error = error.message;
           });
         }
       },
-      mounted: function() { this.update(); }
+      mounted: function() {
+        this.update();
+        setInterval(() => {
+          this.update();
+        }, 5000);
+      }
     });
   }
 
