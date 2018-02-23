@@ -1,12 +1,15 @@
 #!/bin/bash
 
+set -e
+
 cd `dirname -- "${BASH_SOURCE[0]}"`
 
 DATA_DIR="$(dirname -- "$(pwd -P)")/data"
 
-CONFIG_DIR="$DATA_DIR/transmission-config"
-SETTINGS_FILE="$CONFIG_DIR/settings.json"
-PID_FILE="$DATA_DIR/transmission-pid"
+TRANSMISSION_DIR="$DATA_DIR/transmission"
+SETTINGS_FILE="$TRANSMISSION_DIR/settings.json"
+PID_FILE="$TRANSMISSION_DIR/pid.txt"
+LOG_FILE="$TRANSMISSION_DIR/log.txt"
 
 DOWNLOADS_DIR="$DATA_DIR/downloads"
 DOWNLOADS_PARTIAL_DIR="$DATA_DIR/downloads-partial"
@@ -25,7 +28,7 @@ if [ -n "$PID" ]; then
     while [ -e "/proc/$PID" ]; do sleep 0.5; done
 else
     echo "starting transmission-daemon"
-    mkdir -p "$CONFIG_DIR" "$DOWNLOADS_DIR" "$DOWNLOADS_PARTIAL_DIR"
+    mkdir -p "$TRANSMISSION_DIR" "$DOWNLOADS_DIR" "$DOWNLOADS_PARTIAL_DIR"
     cat <<EOF > "$SETTINGS_FILE"
 {
     "download-dir": "$DOWNLOADS_DIR",
@@ -40,5 +43,5 @@ else
     "peer-port-random-on-start": true
 }
 EOF
-    transmission-daemon -x "$PID_FILE" -g "$CONFIG_DIR" -p 9100
+    transmission-daemon -e "$LOG_FILE" -x "$PID_FILE" -g "$TRANSMISSION_DIR" -p 9100
 fi
