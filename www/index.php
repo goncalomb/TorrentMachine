@@ -3,6 +3,8 @@
 require '../vendor/autoload.php';
 use \Asbestos\Asbestos;
 
+Asbestos::startRouting(true);
+
 Asbestos::startThemedPage();
 
 ?>

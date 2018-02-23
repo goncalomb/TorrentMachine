@@ -62,7 +62,7 @@
         e.preventDefault();
         if (this.url) {
           this.locked = true;
-          apiFetch('/api/add.php', {
+          apiFetch('/api/transmission/?action=torrent-add', {
             url: this.url
           }).then(data => {
             this.locked = false;
@@ -132,7 +132,7 @@
       },
       methods: {
         update: function() {
-          apiFetch('/api/list.php').then(data => {
+          apiFetch('/api/transmission/?action=torrent-get').then(data => {
             this.torrents = data;
             this.error = null;
           }).catch(error => {
