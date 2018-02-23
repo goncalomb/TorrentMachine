@@ -26,6 +26,41 @@
     });
   }
 
+
+  Vue.component('dir-entries', {
+    props: ['path', 'name'],
+    template: `
+    <div>
+      <a v-show="entries === null" href="javascript:void(0);" style="font-weight: bold;" @click="load">(open)</a>
+      <a v-show="entries !== null" href="javascript:void(0);" style="font-weight: bold;" @click="entries = null">(close)</a>
+      <a :href="'/files/' + path">{{ name }}/</a>
+      <ul>
+        <li v-for="entry in entries">
+          <dir-entries v-if="entry.type == 'dir'" :path="path + entry.name + '/'" :name="entry.name"></dir-entries>
+          <a v-if="entry.type == 'file'" :href="'/files/' + path + entry.name" target="_blank">{{ entry.name }}</a>
+        </li>
+      </ul>
+    </div>
+    `,
+    data: function() {
+      return {
+        entries: null
+      };
+    },
+    methods: {
+      load: function() {
+        apiFetch('/api/filesystem/?action=list', {
+          path: this.path
+        }).then(data => {
+          this.entries = data;
+        }).catch(error => {
+          alert(error.message);
+        });
+      }
+    }
+  });
+
+
   Vue.component('torrent-add-form', {
     template: `
     <form @submit="submit">
@@ -114,6 +149,13 @@
     </table>
     `
   });
+
+  window.downloadsListing = function(el) {
+    return new Vue({
+      el: el,
+      template: '<dir-entries path="downloads/" name="downloads"></dir-entries>',
+    });
+  }
 
   window.createTorrentAddForm = function(el) {
     return new Vue({
