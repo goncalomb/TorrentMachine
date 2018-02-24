@@ -1,5 +1,7 @@
 (function() {
 
+  var globalMediaPlayer = null;
+
   function apiFetch(url, data) {
     var init = {};
     if (data) {
@@ -26,6 +28,35 @@
     });
   }
 
+  var MediaPlayer = Vue.extend({
+    name: 'media-player',
+    template: `
+    <div v-if="src" class="card bg-light p-3 mb-3">
+      <p><strong>{{ name }}</strong><a class="float-right" href="javascript:void(0);" @click="src = null">Close Player</a></p>
+      <video v-if="src" width="100%" :src="src" controls autoplay></video>
+    </div>
+    `,
+    data: function() {
+      return {
+        src: null
+      };
+    },
+    methods: {
+      playerAvailable: function(path) {
+        var i = path.lastIndexOf('.');
+        if (i != -1) {
+          var ext = path.substr(i);
+          return (ext == '.avi' || ext == '.mp4' || ext == '.mkv')
+        }
+        return false;
+      },
+      playerOpen: function(path) {
+        this.name = path.split('/').pop();
+        this.src = path;
+      }
+    }
+  })
+
   var DirTree = Vue.extend({
     name: 'dir-tree',
     props: ['path', 'name'],
@@ -36,8 +67,9 @@
       <a :href="'/files/' + path">{{ name }}/</a>
       <ul>
         <li v-for="entry in entries">
-          <dir-tree v-if="entry.type == 'dir'" :path="path + entry.name + '/'" :name="entry.name"></dir-tree>
-          <a v-if="entry.type == 'file'" :href="'/files/' + path + entry.name" target="_blank">{{ entry.name }}</a>
+          <dir-tree v-if="entry.type == 'dir'" :path="entry.path" :name="entry.name"></dir-tree>
+          <a v-if="entry.type == 'file' && playerAvailable(entry.path)" href="javascript:void(0);" style="font-weight: bold;" @click="playerOpen(entry.path)">(open on Media Player)</a>
+          <a v-if="entry.type == 'file'" :href="'/files/' + entry.path" target="_blank">{{ entry.name }}</a>
         </li>
       </ul>
     </div>
@@ -51,11 +83,28 @@
       load: function() {
         apiFetch('/api/filesystem/?action=list', {
           path: this.path
-        }).then(data => {
-          this.entries = data;
+        }).then(entries => {
+          entries.forEach(entry => {
+            entry.path = this.path + entry.name;
+            if (entry.type == 'dir') {
+              entry.path += '/';
+            }
+          });
+          this.entries = entries;
         }).catch(error => {
           alert(error.message);
         });
+      },
+      playerAvailable: function(path) {
+        if (globalMediaPlayer) {
+          return globalMediaPlayer.playerAvailable('/files/' + path);
+        }
+        return false;
+      },
+      playerOpen: function(path) {
+        if (globalMediaPlayer) {
+          globalMediaPlayer.playerOpen('/files/' + path);
+        }
       }
     }
   });
@@ -173,8 +222,12 @@
     }
   });
 
+  window.createMediaPlayer = function(el) {
+    return globalMediaPlayer = new MediaPlayer({ el });
+  }
+
   window.createDownloadsListing = function(el) {
-    return new Vue({
+  return new Vue({
       el: el,
       template: '<dir-tree path="downloads/" name="downloads"></dir-tree>',
       components: { DirTree }

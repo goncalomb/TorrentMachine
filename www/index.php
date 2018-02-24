@@ -9,6 +9,9 @@ Asbestos::startThemedPage();
 
 ?>
 
+<div id="media-player"></div>
+<script>window.createMediaPlayer('#media-player')</script>
+
 <h2>Files</h2>
 <div id="downloads-listing"></div>
 <script>window.createDownloadsListing('#downloads-listing');</script>
