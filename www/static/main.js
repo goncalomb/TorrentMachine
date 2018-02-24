@@ -26,8 +26,8 @@
     });
   }
 
-
-  Vue.component('dir-entries', {
+  var DirTree = Vue.extend({
+    name: 'dir-tree',
     props: ['path', 'name'],
     template: `
     <div>
@@ -36,7 +36,7 @@
       <a :href="'/files/' + path">{{ name }}/</a>
       <ul>
         <li v-for="entry in entries">
-          <dir-entries v-if="entry.type == 'dir'" :path="path + entry.name + '/'" :name="entry.name"></dir-entries>
+          <dir-tree v-if="entry.type == 'dir'" :path="path + entry.name + '/'" :name="entry.name"></dir-tree>
           <a v-if="entry.type == 'file'" :href="'/files/' + path + entry.name" target="_blank">{{ entry.name }}</a>
         </li>
       </ul>
@@ -60,8 +60,8 @@
     }
   });
 
-
-  Vue.component('torrent-add-form', {
+  var TorrentAddForm = Vue.extend({
+    name: 'torrent-add-form',
     template: `
     <form @submit="submit">
       <div :class="['alert', { 'alert-success': !messageIsError }, { 'alert-danger': messageIsError }]" v-show="message">{{ message }}</div>
@@ -80,7 +80,7 @@
         messageTimeout: 0,
         locked: false,
         url: ''
-      }
+      };
     },
     methods: {
       setMessage: function(text, isError) {
@@ -113,8 +113,8 @@
     }
   });
 
-  Vue.component('torrent-list', {
-    props: ['torrents', 'error'],
+  var TorrentList = Vue.extend({
+    name: 'torrent-list',
     template: `
     <table class="table table-sm">
       <thead>
@@ -132,7 +132,7 @@
       </thead>
       <tbody>
         <tr v-show="error">
-          <td class="text-danger" colspan="5">{{ error }}</td>
+          <td class="text-danger" colspan="9">{{ error }}</td>
         </tr>
         <tr v-for="torrent in torrents">
           <td>{{ torrent.name }}</td>
@@ -147,49 +147,46 @@
         </tr>
       </tbody>
     </table>
-    `
-  });
-
-  window.downloadsListing = function(el) {
-    return new Vue({
-      el: el,
-      template: '<dir-entries path="downloads/" name="downloads"></dir-entries>',
-    });
-  }
-
-  window.createTorrentAddForm = function(el) {
-    return new Vue({
-      el: el,
-      template: '<torrent-add-form></torrent-add-form>',
-    });
-  }
-
-  window.createTorrentList = function(el) {
-    new Vue({
-      el: el,
-      template: '<torrent-list :torrents="torrents" :error="error"></torrent-list>',
-      data: {
+    `,
+    data: function() {
+      return {
         torrents: [],
         error: null
-      },
-      methods: {
-        update: function() {
-          apiFetch('/api/transmission/?action=torrent-get').then(data => {
-            this.torrents = data;
-            this.error = null;
-          }).catch(error => {
-            this.torrents = [];
-            this.error = error.message;
-          });
-        }
-      },
-      mounted: function() {
-        this.update();
-        setInterval(() => {
-          this.update();
-        }, 5000);
+      };
+    },
+    methods: {
+      update: function() {
+        apiFetch('/api/transmission/?action=torrent-get').then(data => {
+          this.torrents = data;
+          this.error = null;
+        }).catch(error => {
+          this.torrents = [];
+          this.error = error.message;
+        });
       }
+    },
+    mounted: function() {
+      this.update();
+      setInterval(() => {
+        this.update();
+      }, 5000);
+    }
+  });
+
+  window.createDownloadsListing = function(el) {
+    return new Vue({
+      el: el,
+      template: '<dir-tree path="downloads/" name="downloads"></dir-tree>',
+      components: { DirTree }
     });
-  }
+  };
+
+  window.createTorrentAddForm = function(el) {
+    return new TorrentAddForm({ el });
+  };
+
+  window.createTorrentList = function(el) {
+    return new TorrentList({ el });
+  };
 
 })();
