@@ -53,6 +53,9 @@
       playerOpen: function(path) {
         this.name = path.split('/').pop();
         this.src = path;
+        setTimeout(() => {
+          this.$el.scrollIntoView();
+        }, 10);
       }
     }
   })
@@ -165,37 +168,39 @@
   var TorrentList = Vue.extend({
     name: 'torrent-list',
     template: `
-    <table class="table table-sm">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Size</th>
-          <th>Downloaded</th>
-          <th>Progress</th>
-          <th>ETA</th>
-          <th>Status</th>
-          <th>Peers (U/D)</th>
-          <th>Download</th>
-          <th>Upload</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-show="error">
-          <td class="text-danger" colspan="9">{{ error }}</td>
-        </tr>
-        <tr v-for="torrent in torrents">
-          <td>{{ torrent.name }}</td>
-          <td>{{ torrent.totalSize }}</td>
-          <td>{{ torrent.haveValid }}</td>
-          <td>{{ torrent.totalSize ? Math.floor(torrent.haveValid*10000/torrent.totalSize)/100 : 0 }} %</td>
-          <td>{{ torrent.eta > 0 ? torrent.eta : 0 }}</td>
-          <td>{{ torrent.statusString }}</td>
-          <td>{{ torrent.peersConnected + '/' + torrent.maxConnectedPeers + ' (' + torrent.peersGettingFromUs + '/' + torrent.peersSendingToUs + ')' }}</td>
-          <td>{{ torrent.rateDownload }}</td>
-          <td>{{ torrent.rateUpload }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div style="overflow-x: auto;">
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Size</th>
+            <th>Downloaded</th>
+            <th>Progress</th>
+            <th>ETA</th>
+            <th>Status</th>
+            <th>Peers (U/D)</th>
+            <th>Download</th>
+            <th>Upload</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-show="error">
+            <td class="text-danger" colspan="9">{{ error }}</td>
+          </tr>
+          <tr v-for="torrent in torrents">
+            <td>{{ torrent.name }}</td>
+            <td>{{ torrent.totalSize }}</td>
+            <td>{{ torrent.haveValid }}</td>
+            <td>{{ torrent.totalSize ? Math.floor(torrent.haveValid*10000/torrent.totalSize)/100 : 0 }} %</td>
+            <td>{{ torrent.eta > 0 ? torrent.eta : 0 }}</td>
+            <td>{{ torrent.statusString }}</td>
+            <td>{{ torrent.peersConnected + '/' + torrent.maxConnectedPeers + ' (' + torrent.peersGettingFromUs + '/' + torrent.peersSendingToUs + ')' }}</td>
+            <td>{{ torrent.rateDownload }}</td>
+            <td>{{ torrent.rateUpload }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     `,
     data: function() {
       return {
@@ -229,7 +234,11 @@
   window.createDownloadsListing = function(el) {
   return new Vue({
       el: el,
-      template: '<dir-tree path="downloads/" name="downloads"></dir-tree>',
+      template: `
+      <div style="overflow-x: auto;">
+        <dir-tree path="downloads/" name="downloads"></dir-tree>
+      </div>
+      `,
       components: { DirTree }
     });
   };

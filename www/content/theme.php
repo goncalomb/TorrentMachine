@@ -2,6 +2,8 @@
 
 use \Asbestos\Page;
 
+Page::metaTag('viewport', 'width=device-width, initial-scale=1');
+
 Page::title("Torrent Machine");
 
 Page::stylesheetFile('https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css');
