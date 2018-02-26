@@ -31,8 +31,13 @@
   var MediaPlayer = Vue.extend({
     name: 'media-player',
     template: `
-    <div v-if="src" class="card bg-light p-3 mb-3">
-      <p><strong>{{ name }}</strong><a class="float-right" href="javascript:void(0);" @click="src = null">Close Player</a></p>
+    <div v-if="src" class="card bg-light mb-3">
+      <p class="p-3 m-0">
+        <strong style="line-height: 1.9rem;">{{ name }}</strong>
+        <span class="float-right">
+          <a class="btn btn-sm btn-secondary" href="javascript:void(0);" @click="src = null"><i class="fa fa-close"></i> Close Player</a>
+        </span>
+      </p>
       <video v-if="src" width="100%" :src="src" controls autoplay></video>
     </div>
     `,
@@ -55,6 +60,7 @@
         this.src = path;
         setTimeout(() => {
           this.$el.scrollIntoView();
+          window.scrollBy(0, -10);
         }, 10);
       }
     }
@@ -65,13 +71,13 @@
     props: ['path', 'name'],
     template: `
     <div>
-      <a v-show="entries === null" href="javascript:void(0);" style="font-weight: bold;" @click="load">(open)</a>
-      <a v-show="entries !== null" href="javascript:void(0);" style="font-weight: bold;" @click="entries = null">(close)</a>
+      <a v-show="entries === null" href="javascript:void(0);" @click="load" title="open"><i class="fa fa-fw fa-chevron-right"></i></a>
+      <a v-show="entries !== null" href="javascript:void(0);" @click="entries = null" title="close"><i class="fa fa-fw fa-chevron-down"></i></a>
       <a :href="'/files/' + path">{{ name }}/</a>
-      <ul>
+      <ul style="list-style: none;">
         <li v-for="entry in entries">
           <dir-tree v-if="entry.type == 'dir'" :path="entry.path" :name="entry.name"></dir-tree>
-          <a v-if="entry.type == 'file' && playerAvailable(entry.path)" href="javascript:void(0);" style="font-weight: bold;" @click="playerOpen(entry.path)">(open on Media Player)</a>
+          <a v-if="entry.type == 'file' && playerAvailable(entry.path)" href="javascript:void(0);" @click="playerOpen(entry.path)" title="open on media player"><i class="fa fa-fw fa-film"></i></a>
           <a v-if="entry.type == 'file'" :href="'/files/' + entry.path" target="_blank">{{ entry.name }}</a>
         </li>
       </ul>
