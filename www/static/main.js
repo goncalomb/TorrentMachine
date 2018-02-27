@@ -35,15 +35,20 @@
       <p class="p-3 m-0">
         <strong style="line-height: 1.9rem;">{{ name }}</strong>
         <span class="float-right">
+          <a v-show="srcSubtitles === null" class="btn btn-sm btn-outline-secondary" href="javascript:void(0);" @click="searchSubtitles"><i class="fa fa-comment-o"></i> Search for English Subtitles</a>
           <a class="btn btn-sm btn-secondary" href="javascript:void(0);" @click="src = null"><i class="fa fa-close"></i> Close Player</a>
         </span>
       </p>
-      <video v-if="src" width="100%" :src="src" controls autoplay></video>
+      <video v-if="src" width="100%" :src="src" controls autoplay>
+        <track v-if="srcSubtitles" label="English" kind="subtitles" srclang="en" :src="srcSubtitles" default>
+      </video>
     </div>
     `,
     data: function() {
       return {
-        src: null
+        name: "",
+        src: null,
+        srcSubtitles: null
       };
     },
     methods: {
@@ -58,10 +63,14 @@
       playerOpen: function(path) {
         this.name = path.split('/').pop();
         this.src = path;
+        this.srcSubtitles = null;
         setTimeout(() => {
           this.$el.scrollIntoView();
           window.scrollBy(0, -10);
         }, 10);
+      },
+      searchSubtitles: function() {
+        this.srcSubtitles = "/subtitles/?name=" + window.encodeURIComponent(this.name);
       }
     }
   })
