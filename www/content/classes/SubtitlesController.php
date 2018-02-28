@@ -5,6 +5,10 @@ use \Asbestos\Response;
 
 final class SubtitlesController {
 
+    private static $_specialSubtitleUsers = [
+        'elderman', 'GoldenBeard'
+    ];
+
     private static function serveSrtAsVtt($data) {
         $data = str_replace("\xEF\xBB\xBF", '', $data); // remove BOM
         Response::contentType('text/vtt');
@@ -68,15 +72,33 @@ final class SubtitlesController {
             $subtitles = array_filter($subtitles, function ($sub) {
                 return (strtolower($sub['language']) == 'english');
             });
+            // calculate levenshtein distance
+            $name_no_ext = preg_replace('/\.[a-z\d]{3,4}$/i', '', $name);
+            $name_no_ext_no_brackets = preg_replace('/\[.*?\]/', '', $name_no_ext);
+            foreach ($subtitles as &$s) {
+                $rel = strtolower($s['release']);
+                $l0 = levenshtein($rel, $name, 1, 2, 1);
+                $l1 = levenshtein($rel, $name_no_ext, 1, 2, 1) + 1;
+                $l2 = levenshtein($rel, $name_no_ext_no_brackets, 1, 2, 1) + 1;
+                $s['levenshtein'] = min($l0, $l1, $l2);
+            }
+            // find specials
+            foreach ($subtitles as &$s) {
+                $s['special'] = in_array($s['user'], self::$_specialSubtitleUsers);
+            }
             // order by hi and relevance
             usort($subtitles, function($a, $b) use ($name) {
-                if ($a['release'] == $b['release']) {
+                if ($a['levenshtein'] == $b['levenshtein']) {
+                    if ($a['hi'] == $b['hi']) {
+                        return (($a['special'] == $b['special']) ? 0 : ($a['special'] ? -1 : 1));
+                    }
                     return ($a['hi'] ? 1 : -1);
                 }
-                return levenshtein(strtolower($a['release']), $name) - levenshtein(strtolower($b['release']), $name);
+                return $a['levenshtein'] - $b['levenshtein'];
             });
 
             if (count($subtitles)) {
+                // use the first one
                 $sub = $subtitles[0];
                 $data = $sub['fetch']();
                 static::serveSrtAsVtt("0\n00:00:00,000 --> 00:00:05,000\n{$sub['release']}\n[{$sub['user']} - " . ($sub['hi'] ? 'H.I.' : 'Clean') . "]\n\n" . $data);
