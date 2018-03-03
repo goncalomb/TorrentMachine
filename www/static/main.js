@@ -28,6 +28,30 @@
     });
   }
 
+  function formatSize(b) {
+    if (b >= 1073741824) {
+      return Math.floor(b/10737418.24)/100 + ' GB';
+    } else if (b >= 1048576) {
+      return Math.floor(b/10485.76)/100 + ' MB';
+    } else if (b >= 1024) {
+      return Math.floor(b/10.24)/100 + ' KB';
+    } else if (b == 1) {
+      return b + ' byte';
+    }
+    return b + ' bytes';
+  }
+
+  function formatDuration(t) {
+    if (!t) return '0s';
+    return (t < 0 ? '-' : '') + ((t) => {
+      var d = Math.floor(t/86400);
+      var h = Math.floor(t%86400/3600);
+      var m = Math.floor(t%3600/60);
+      var s = Math.floor(t%60);
+      return (d ? d + 'd' : '') + (h ? h + 'h' : '') + (m ? m + 'm' : '') + (s ? s + 's' : '');
+    })(Math.abs(t));
+  }
+
   var MediaPlayer = Vue.extend({
     name: 'media-player',
     template: `
@@ -187,9 +211,8 @@
       <table class="table table-sm">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Size</th>
-            <th>Downloaded</th>
+            <th></th>
+            <th>Torrent</th>
             <th>Progress</th>
             <th>ETA</th>
             <th>Status</th>
@@ -200,18 +223,27 @@
         </thead>
         <tbody>
           <tr v-show="error">
-            <td class="text-danger" colspan="9">{{ error }}</td>
+            <td class="text-danger" colspan="8">{{ error }}</td>
           </tr>
           <tr v-for="torrent in torrents">
-            <td>{{ torrent.name }}</td>
-            <td>{{ torrent.totalSize }}</td>
-            <td>{{ torrent.haveValid }}</td>
-            <td>{{ torrent.totalSize ? Math.floor(torrent.haveValid*10000/torrent.totalSize)/100 : 0 }} %</td>
-            <td>{{ torrent.eta > 0 ? torrent.eta : 0 }}</td>
+            <td>
+              <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-secondary" :disabled="torrent.status != 0" @click="torrentAction('start', torrent.id)" title="start"><i class="fa fa-play"></i></button>
+              <button class="btn btn-outline-secondary" :disabled="torrent.status == 0" @click="torrentAction('stop', torrent.id)" title="pause"><i class="fa fa-pause"></i></button>
+              <button class="btn btn-outline-secondary" @click="torrentAction('verify', torrent.id)" title="verify"><i class="fa fa-check"></i></button>
+              </div>
+            </td>
+            <td>
+              {{ torrent.name }}<br>
+              <small>{{ torrent.haveValid | formatSize }} of {{ torrent.totalSize | formatSize }}</small>
+            </td>
+            <td v-if="torrent.recheckProgress">{{ Math.floor(torrent.recheckProgress*10000)/100 }}%</small>
+            <td v-else>{{ torrent.totalSize ? Math.floor(torrent.haveValid*10000/torrent.totalSize)/100 : 0 }}%</td>
+            <td v-if="torrent.eta >= 0">{{ torrent.eta | formatDuration }}</td><td v-else></td>
             <td>{{ torrent.statusString }}</td>
             <td>{{ torrent.peersConnected + '/' + torrent.maxConnectedPeers + ' (' + torrent.peersGettingFromUs + '/' + torrent.peersSendingToUs + ')' }}</td>
-            <td>{{ torrent.rateDownload }}</td>
-            <td>{{ torrent.rateUpload }}</td>
+            <td v-if="torrent.rateDownload">{{ torrent.rateDownload | formatSize }}/s</td><td v-else></td>
+            <td v-if="torrent.rateUpload">{{ torrent.rateUpload | formatSize }}/s</td><td v-else></td>
           </tr>
         </tbody>
       </table>
@@ -225,20 +257,35 @@
     },
     methods: {
       update: function() {
-        apiFetch('/api/transmission/?action=torrent-get').then(data => {
+        return apiFetch('/api/transmission/?action=torrent-get').then(data => {
           this.torrents = data;
           this.error = null;
         }).catch(error => {
           this.torrents = [];
           this.error = error.message;
         });
+      },
+      torrentAction: function(action, id) {
+        apiFetch('/api/transmission/?action=torrent-' + action, {
+          ids: id
+        }).then(data => {
+          this.update();
+        }).catch(error => {
+          alert(error.message);
+        });
+        document.activeElement.blur();
       }
     },
+    filters: {
+      formatSize, formatDuration
+    },
     mounted: function() {
-      this.update();
-      setInterval(() => {
-        this.update();
-      }, 5000);
+      var continuousUpdate = () => {
+        this.update().then(() => {
+          setTimeout(continuousUpdate, 5000);
+        });
+      }
+      continuousUpdate();
     }
   });
 
