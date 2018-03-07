@@ -16,7 +16,7 @@ Asbestos::startThemedPage();
 <div id="downloads-listing"></div>
 <script>window.createDownloadsListing('#downloads-listing');</script>
 
-<h2>Torrents<small class="float-right mt-2"><a class="small" href="/files/transmission-log.txt">Transmission Log</a></small></h2>
+<h2>Torrents</h2>
 <div id="torrent-add-form"></div>
 <script>window.createTorrentAddForm('#torrent-add-form');</script>
 <div id="torrent-list"></div>

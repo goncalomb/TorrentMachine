@@ -48,6 +48,12 @@ final class ApiFilesystemController extends ApiController {
                     $result[] = ['type' => 'file', 'name' => $entry, 'size' => filesize($path)];
                 }
             }
+            usort($result, function($a, $b) {
+                if ($a['type'] == $b['type']) {
+                    return strcasecmp($a['name'], $b['name']);
+                }
+                return ($a['type'] == 'dir' ? -1 : 1);
+            });
             static::sendJSON($result);
         } else {
             static::sendJSON(null, 'Path not found.');

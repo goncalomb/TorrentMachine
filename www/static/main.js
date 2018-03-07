@@ -105,9 +105,10 @@
     template: `
     <div>
       <a v-show="entries === null" href="javascript:void(0);" @click="load" title="open"><i class="fa fa-fw fa-chevron-right"></i></a>
-      <a v-show="entries !== null" href="javascript:void(0);" @click="entries = null" title="close"><i class="fa fa-fw fa-chevron-down"></i></a>
-      <a :href="'/files/' + path">{{ name }}/</a>
-      <ul style="list-style: none;">
+      <i v-show="entries === false" class="fa fa-fw fa-circle-o-notch fa-spin"></i>
+      <a v-show="entries" href="javascript:void(0);" @click="entries = null" title="close"><i class="fa fa-fw fa-chevron-down"></i></a>
+      <a :href="'/files/' + path" target="_blank">{{ name }}/</a>
+      <ul style="list-style: none; margin-left: 9px; padding-left: 8px; border-left: 2px solid #ddd;">
         <li v-for="entry in entries">
           <dir-tree v-if="entry.type == 'dir'" :path="entry.path" :name="entry.name"></dir-tree>
           <a v-if="entry.type == 'file' && playerAvailable(entry.path)" href="javascript:void(0);" @click="playerOpen(entry.path)" title="open on media player"><i class="fa fa-fw fa-film"></i></a>
@@ -123,6 +124,7 @@
     },
     methods: {
       load: function() {
+        this.entries = false;
         apiFetch('/api/filesystem/?action=list', {
           path: this.path
         }).then(entries => {
@@ -294,14 +296,17 @@
   }
 
   window.createDownloadsListing = function(el) {
-  return new Vue({
+    return new Vue({
       el: el,
       template: `
       <div style="overflow-x: auto;">
-        <dir-tree path="downloads/" name="downloads"></dir-tree>
+        <dir-tree path="" name="" ref="tree"></dir-tree>
       </div>
       `,
-      components: { DirTree }
+      components: { DirTree },
+      mounted: function() {
+        this.$refs.tree.load()
+      }
     });
   };
 
