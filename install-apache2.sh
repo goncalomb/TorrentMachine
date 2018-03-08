@@ -8,16 +8,29 @@ SITE_FILE="/etc/apache2/sites-available/000-torrent-machine.conf"
 echo "writing '$SITE_FILE'"
 cat <<EOF > "$SITE_FILE"
 <Directory ${DIR}/www/>
-	Options Indexes FollowSymLinks
+	ServerSignature Off
+	DirectoryIndex index.php
+	DirectorySlash On
+	AcceptPathInfo Off
+	RewriteEngine On
+	Options -MultiViews +Indexes -Includes -ExecCGI +FollowSymLinks
+
+	ErrorDocument 400 /
+	ErrorDocument 403 /
+	ErrorDocument 404 /
+	ErrorDocument 500 /
+	ErrorDocument 503 /
+
 	AllowOverride None
 	Require all granted
 
-	<IfModule mod_rewrite.c>
-		RewriteEngine On
-		RewriteCond %{REQUEST_FILENAME} !-d
-		RewriteCond %{REQUEST_FILENAME} !-f
-		RewriteRule .? index.php [L]
-	</IfModule>
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteRule .? index.php [L]
+</Directory>
+
+<Directory ${DIR}/www/content/>
+	Require all denied
 </Directory>
 
 Listen 9000
