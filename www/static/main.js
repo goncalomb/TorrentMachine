@@ -136,6 +136,7 @@
           });
           this.entries = entries;
         }).catch(error => {
+          this.entries = null;
           alert(error.message);
         });
       },
@@ -251,7 +252,7 @@
                 <div class="btn-group btn-group-sm">
                   <button v-if="!torrent.status" class="btn btn-outline-secondary" @click="torrentAction('start', torrent.id)" title="start"><i class="fa fa-fw fa-play"></i></button>
                   <button v-if="torrent.status" class="btn btn-outline-secondary" @click="torrentAction('stop', torrent.id)" title="pause"><i class="fa fa-fw fa-pause"></i></button>
-                  <button class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="more options"></button>
+                  <button class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" data-boundary="viewport" aria-haspopup="true" aria-expanded="false" title="more options"></button>
                   <div class="dropdown-menu">
                     <a class="dropdown-item" href="javascript:void(0);" @click="torrentAction('start', torrent.id)"><i class="fa fa-fw fa-play"></i> Start</a>
                     <a class="dropdown-item" href="javascript:void(0);" @click="torrentAction('stop', torrent.id)"><i class="fa fa-fw fa-pause"></i> Pause</a>
