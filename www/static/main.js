@@ -209,50 +209,79 @@
   var TorrentList = Vue.extend({
     name: 'torrent-list',
     template: `
-    <div style="overflow-x: auto;">
-      <table class="table table-sm">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Torrent</th>
-            <th>Progress</th>
-            <th>ETA</th>
-            <th>Status</th>
-            <th>Peers (U/D)</th>
-            <th>Download</th>
-            <th>Upload</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-show="error">
-            <td class="text-danger" colspan="8">{{ error }}</td>
-          </tr>
-          <tr v-for="torrent in torrents">
-            <td>
-              <div class="btn-group btn-group-sm">
-              <button class="btn btn-outline-secondary" :disabled="torrent.status != 0" @click="torrentAction('start', torrent.id)" title="start"><i class="fa fa-play"></i></button>
-              <button class="btn btn-outline-secondary" :disabled="torrent.status == 0" @click="torrentAction('stop', torrent.id)" title="pause"><i class="fa fa-pause"></i></button>
-              <button class="btn btn-outline-secondary" @click="torrentAction('verify', torrent.id)" title="verify"><i class="fa fa-check"></i></button>
-              </div>
-            </td>
-            <td>
-              {{ torrent.name }}<br>
-              <small>{{ torrent.haveValid | formatSize }} of {{ torrent.totalSize | formatSize }}</small>
-            </td>
-            <td v-if="torrent.recheckProgress">{{ Math.floor(torrent.recheckProgress*10000)/100 }}%</small>
-            <td v-else>{{ torrent.totalSize ? Math.floor(torrent.haveValid*10000/torrent.totalSize)/100 : 0 }}%</td>
-            <td v-if="torrent.eta >= 0">{{ torrent.eta | formatDuration }}</td><td v-else></td>
-            <td>{{ torrent.statusString }}</td>
-            <td>{{ torrent.peersConnected + '/' + torrent.maxConnectedPeers + ' (' + torrent.peersGettingFromUs + '/' + torrent.peersSendingToUs + ')' }}</td>
-            <td v-if="torrent.rateDownload">{{ torrent.rateDownload | formatSize }}/s</td><td v-else></td>
-            <td v-if="torrent.rateUpload">{{ torrent.rateUpload | formatSize }}/s</td><td v-else></td>
-          </tr>
-        </tbody>
-      </table>
+    <div>
+      <div class="form-inline mb-2">
+        <div class="btn-group mb-2 mr-sm-2">
+          <button class="btn btn-outline-secondary" @click="torrentAction('start')" title="start all torrents"><i class="fa fa-play"></i> Start All</button>
+          <button class="btn btn-outline-secondary" @click="torrentAction('stop')" title="pause all torrents"><i class="fa fa-pause"></i> Pause All</button>
+        </div>
+        <div class="input-group mb-2 mr-sm-2">
+          <div class="input-group-prepend">
+            <div class="input-group-text">Show:</div>
+          </div>
+          <select class="form-control" v-model="filterStatus">
+            <option value="-1" default>All ({{ torrents.length }})</option>
+            <option value="0">Stopped ({{ countByStatus[0] }})</option>
+            <option value="1">Verifying ({{ countByStatus[1] }})</option>
+            <option value="2">Downloading ({{ countByStatus[2] }})</option>
+            <option value="3">Seeding ({{ countByStatus[3] }})</option>
+          </select>
+        </div>
+      </div>
+      <div style="overflow-x: auto;">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Torrent</th>
+              <th>Progress</th>
+              <th>ETA</th>
+              <th>Status</th>
+              <th>Peers (U/D)</th>
+              <th>Download</th>
+              <th>Upload</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-show="error">
+              <td class="text-danger" colspan="8">{{ error }}</td>
+            </tr>
+            <tr v-for="torrent in torrents" v-if="filterStatus == -1 || torrent.statusSimple == filterStatus">
+              <td>
+                <div class="btn-group btn-group-sm">
+                  <button v-if="!torrent.status" class="btn btn-outline-secondary" @click="torrentAction('start', torrent.id)" title="start"><i class="fa fa-fw fa-play"></i></button>
+                  <button v-if="torrent.status" class="btn btn-outline-secondary" @click="torrentAction('stop', torrent.id)" title="pause"><i class="fa fa-fw fa-pause"></i></button>
+                  <button class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="more options"></button>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="javascript:void(0);" @click="torrentAction('start', torrent.id)"><i class="fa fa-fw fa-play"></i> Start</a>
+                    <a class="dropdown-item" href="javascript:void(0);" @click="torrentAction('stop', torrent.id)"><i class="fa fa-fw fa-pause"></i> Pause</a>
+                    <a class="dropdown-item" href="javascript:void(0);" @click="torrentAction('verify', torrent.id)"><i class="fa fa-fw fa-check"></i> Verify</a>
+                    <a class="dropdown-item" href="javascript:void(0);" @click="torrentAction('reannounce', torrent.id)"><i class="fa fa-fw fa-users"></i> Ask for more peers</a>
+                    <a class="dropdown-item" href="javascript:void(0);" @click="if (confirm('Remove torrent and delete data?')) torrentAction('remove', torrent.id)"><i class="fa fa-fw fa-trash"></i> Remove</a>
+                  </div>
+                </div>
+              </td>
+              <td>
+                {{ torrent.name }}<br>
+                <small>{{ torrent.haveValid | formatSize }} of {{ torrent.totalSize | formatSize }}</small>
+              </td>
+              <td v-if="torrent.recheckProgress">{{ Math.floor(torrent.recheckProgress*10000)/100 }}%</small>
+              <td v-else>{{ torrent.totalSize ? Math.floor(torrent.haveValid*10000/torrent.totalSize)/100 : 0 }}%</td>
+              <td v-if="torrent.eta >= 0">{{ torrent.eta | formatDuration }}</td><td v-else></td>
+              <td>{{ torrent.statusString }}</td>
+              <td>{{ torrent.peersConnected + '/' + torrent.maxConnectedPeers + ' (' + torrent.peersGettingFromUs + '/' + torrent.peersSendingToUs + ')' }}</td>
+              <td v-if="torrent.rateDownload">{{ torrent.rateDownload | formatSize }}/s</td><td v-else></td>
+              <td v-if="torrent.rateUpload">{{ torrent.rateUpload | formatSize }}/s</td><td v-else></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     `,
     data: function() {
       return {
+        filterStatus: -1,
+        countByStatus: { 0: 0, 1: 0, 2: 0, 3: 0 },
         torrents: [],
         error: null
       };
@@ -260,6 +289,11 @@
     methods: {
       update: function() {
         return apiFetch('/api/transmission/?action=torrent-get').then(data => {
+          this.countByStatus = { 0: 0, 1: 0, 2: 0, 3: 0 };
+          data.forEach((t) => {
+            t.statusSimple = (t.status == 0 ? 0 : Math.ceil(t.status/2));
+            this.countByStatus[t.statusSimple]++;
+          });
           this.torrents = data;
           this.error = null;
         }).catch(error => {
@@ -267,9 +301,12 @@
           this.error = error.message;
         });
       },
-      torrentAction: function(action, id) {
+      torrentAction: function(action, ids) {
+        if (!ids) {
+          ids = this.torrents.map(t => t.id).join(',');
+        }
         apiFetch('/api/transmission/?action=torrent-' + action, {
-          ids: id
+          ids: ids
         }).then(data => {
           this.update();
         }).catch(error => {

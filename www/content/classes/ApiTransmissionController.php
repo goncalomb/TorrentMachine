@@ -76,6 +76,19 @@ final class ApiTransmissionController extends ApiController {
         }
     }
 
+    private static function action_torrent_remove($action, $trpc) {
+        if (empty($_POST['ids'])) {
+            static::sendJSON(null, 'API Error: Invalid \'ids\' parameter.');
+        } else {
+            $result = $trpc->remove(array_map('intval', explode(',', $_POST['ids'])), true);
+            if ($result['result'] == 'success') {
+                static::sendJSON(null);
+            } else {
+                static::sendJSON(null, 'Error: ' . $result['result']);
+            }
+        }
+    }
+
 }
 
 ?>
