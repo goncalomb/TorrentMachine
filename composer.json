@@ -18,7 +18,7 @@
         }
     ],
     "require": {
-        "goncalomb/asbestos": "dev-master#5f611c58f96b508c2ead8c3e20e6d381fa4bb483",
+        "goncalomb/asbestos": "dev-master#70dcfef15e5feeb207cd038b3a5566c24de04ae9",
         "brycied00d/PHP-Transmission-Class": "dev-master#28f670791f85b347708f72ff9faeb4c8a93b79b0"
     },
     "authors": [
