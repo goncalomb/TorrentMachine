@@ -11,7 +11,7 @@ For now, the TorrentMachine can be installed on a basic Linux + Apache2 + PHP st
 * Install Apache2, PHP, transmission-daemon and composer.
 * Run `composer install` to download dependencies.
 * Run `sudo vendor/bin/asbestos install --port 9000 --indexes --reload` to register a new site and reload apache.
-* Run `scripts/transmission.sh` to start the transmission daemon.
+* Run `bin/transmission start` to start the transmission daemon.
 
 The web interface should be available at `http://localhost:9000`.
 

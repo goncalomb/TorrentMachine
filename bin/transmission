@@ -1,8 +1,7 @@
 #!/bin/bash
 
 set -e
-
-cd `dirname -- "${BASH_SOURCE[0]}"`
+cd "$(dirname -- "${BASH_SOURCE[0]}")"
 
 DATA_DIR="$(dirname -- "$(pwd -P)")/data"
 
@@ -22,14 +21,13 @@ if [ -f "$PID_FILE" ]; then
     fi
 fi
 
-if [ -n "$PID" ]; then
-    echo "killing transmission-daemon"
-    kill "$PID"
-    while [ -e "/proc/$PID" ]; do sleep 0.5; done
-else
-    echo "starting transmission-daemon"
-    mkdir -p "$TRANSMISSION_DIR" "$DOWNLOADS_DIR" "$DOWNLOADS_PARTIAL_DIR"
-    cat <<EOF > "$SETTINGS_FILE"
+if [ "$1" == "start" ]; then
+    if [ -n "$PID" ]; then
+        echo "transmission-daemon is running"
+    else
+        echo "starting transmission-daemon"
+        mkdir -p "$TRANSMISSION_DIR" "$DOWNLOADS_DIR" "$DOWNLOADS_PARTIAL_DIR"
+        cat <<EOF > "$SETTINGS_FILE"
 {
     "download-dir": "$DOWNLOADS_DIR",
     "incomplete-dir": "$DOWNLOADS_PARTIAL_DIR",
@@ -43,5 +41,19 @@ else
     "peer-port-random-on-start": true
 }
 EOF
-    transmission-daemon -e "$LOG_FILE" -x "$PID_FILE" -g "$TRANSMISSION_DIR" -p 9100
+        transmission-daemon -e "$LOG_FILE" -x "$PID_FILE" -g "$TRANSMISSION_DIR" -p 9100
+    fi
+
+elif [ "$1" == "stop" ]; then
+    if [ -z "$PID" ]; then
+        echo "transmission-daemon not running"
+    else
+        echo "killing transmission-daemon"
+        kill "$PID"
+        while [ -e "/proc/$PID" ]; do sleep 0.5; done
+    fi
+
+else
+    echo "Usage: $0 start|stop"
+    exit 1
 fi
