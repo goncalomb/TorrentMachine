@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -e
+cd "$(dirname -- "${BASH_SOURCE[0]}")"
+
+./transmission start
+
+php -r "require __DIR__ . '/../vendor/autoload.php'; TorrentMachine::doWork();"

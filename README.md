@@ -15,6 +15,14 @@ For now, the TorrentMachine can be installed on a basic Linux + Apache2 + PHP st
 
 The web interface should be available at `http://localhost:9000`.
 
+### Configure cron
+
+The `bin/work` script should be run periodically to automatically organize your torrents. Add it to cron with `crontab -e`:
+
+    */5 * * * * ~/TorrentMachine/bin/work
+
+### Limit access
+
 You can manually configure [mod_auth_digest](http://httpd.apache.org/docs/current/mod/mod_auth_digest.html) to limit access to the web interface, integrated login is not available yet.
 
 ## License

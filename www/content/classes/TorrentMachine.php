@@ -12,6 +12,11 @@ final class TorrentMachine {
         }
     }
 
+    public static function doWork() {
+        echo "organizing torrents\n";
+        TorrentOrganizer::organize();
+    }
+
     private function __construct() { }
 
 }

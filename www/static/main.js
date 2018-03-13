@@ -2,6 +2,16 @@
 
   var globalMediaPlayer = null;
 
+  function jsonFetch(url, init) {
+    return fetch(url, init).then(response => {
+      if (response.status >= 200 && response.status < 300) {
+        return response.json();
+      } else {
+        return Promise.reject(new Error(response.status + ' ' + response.statusText));
+      }
+    });
+  }
+
   function apiFetch(url, data) {
     var init = {};
     if (data) {
@@ -13,13 +23,7 @@
         }
       }
     }
-    return fetch(url, init).then(response => {
-      if (response.status >= 200 && response.status < 300) {
-        return response.json();
-      } else {
-        return Promise.reject(new Error(response.status + ' ' + response.statusText));
-      }
-    }).then(json => {
+    return jsonFetch(url, init).then(json => {
       if (json.error) {
         return Promise.reject(new Error(json.error));
       } else {
@@ -329,6 +333,42 @@
     }
   });
 
+  var TVShowsList = Vue.extend({
+    name: 'tvshows-list',
+    template: `
+    <div>
+      <div v-for="sho in tvshows" class="card bg-light mb-3">
+        <div class="card-body">
+          <h3>{{sho.name}}</h3>
+          <button v-for="ep in sho.episodes" class="btn btn-sm ml-2 mb-2" :class="{ 'btn-outline-primary': ep.have, 'btn-outline-secondary': !ep.have }" @click="playerOpen(ep.path)" :disabled="!ep.have" :title="ep.have ? 'open on media player' : 'not available'">
+            <i class="fa fa-fw fa-film"></i> {{ep.number}} ({{ep.tags}})
+          </button>
+        </div>
+      </div>
+    </div>
+    `,
+    data: function() {
+      return {
+        tvshows: []
+      };
+    },
+    methods: {
+      playerOpen: function(path) {
+        if (globalMediaPlayer) {
+          globalMediaPlayer.playerOpen('/files/downloads/' + path);
+        }
+        document.activeElement.blur();
+      }
+    },
+    mounted: function() {
+      return jsonFetch('/files/tvshows.json').then(json => {
+        this.tvshows = json;
+      }).catch(error => {
+        alert(error.message);
+      });
+    }
+  });
+
   window.createMediaPlayer = function(el) {
     return globalMediaPlayer = new MediaPlayer({ el });
   }
@@ -354,6 +394,10 @@
 
   window.createTorrentList = function(el) {
     return new TorrentList({ el });
+  };
+
+  window.createTVShowsList = function(el) {
+    return new TVShowsList({ el });
   };
 
 })();

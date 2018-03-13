@@ -19,9 +19,25 @@ Page::scriptFile('/static/main.js');
 
 ?>
 
-<nav class="navbar navbar-light bg-light">
+<nav class="navbar navbar-expand-md navbar-light bg-light">
     <div class="container">
         <a class="navbar-brand" href="/">Torrent Machine</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Torrents</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/fs/">Files</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tvshows/">TVShows</a>
+                </li>
+            </ul>
+        </div>
     </div>
 </nav>
 
@@ -31,3 +47,6 @@ Page::createZone('main', 'main')->attribute('class', 'container');
 Page::setOutputZone('main');
 
 ?>
+
+<div id="media-player"></div>
+<script>window.createMediaPlayer('#media-player')</script>
