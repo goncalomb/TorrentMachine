@@ -30,15 +30,19 @@ if [ "$1" == "start" ]; then
         cat <<EOF > "$SETTINGS_FILE"
 {
     "download-dir": "$DOWNLOADS_DIR",
+    "encryption": 2,
     "incomplete-dir": "$DOWNLOADS_PARTIAL_DIR",
     "incomplete-dir-enabled" : true,
-
+    "peer-port-random-on-start": true,
     "ratio-limit": 0,
     "ratio-limit-enabled": true,
+    "rpc-bind-address": "127.0.0.1",
+    "scrape-paused-torrents-enabled": false,
+    "script-torrent-done-enabled": true,
+    "script-torrent-done-filename": "$(pwd -P)/work",
     "speed-limit-up": 25,
     "speed-limit-up-enabled": true,
-
-    "peer-port-random-on-start": true
+    "utp-enabled": false
 }
 EOF
         transmission-daemon -e "$LOG_FILE" -x "$PID_FILE" -g "$TRANSMISSION_DIR" -p 9100
