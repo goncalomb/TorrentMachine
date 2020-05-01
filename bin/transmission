@@ -45,7 +45,7 @@ if [ "$1" == "start" ]; then
     "utp-enabled": false
 }
 EOF
-        transmission-daemon -e "$LOG_FILE" -x "$PID_FILE" -g "$TRANSMISSION_DIR" -p 9100
+        transmission-daemon -e "$LOG_FILE" -x "$PID_FILE" -g "$TRANSMISSION_DIR"
     fi
 
 elif [ "$1" == "stop" ]; then
