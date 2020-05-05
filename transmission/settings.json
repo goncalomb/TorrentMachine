@@ -1,0 +1,17 @@
+{
+    "download-dir": "/root/downloads",
+    "encryption": 2,
+    "incomplete-dir": "/root/downloads-partial",
+    "incomplete-dir-enabled": true,
+    "peer-port-random-on-start": true,
+    "ratio-limit": 0,
+    "ratio-limit-enabled": true,
+    "rpc-host-whitelist-enabled": false,
+    "rpc-whitelist-enabled": false,
+    "scrape-paused-torrents-enabled": false,
+    "script-torrent-done-enabled": true,
+    "script-torrent-done-filename": "/root/done.sh",
+    "speed-limit-up": 25,
+    "speed-limit-up-enabled": true,
+    "utp-enabled": false
+}

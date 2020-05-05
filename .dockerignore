@@ -1,5 +1,6 @@
 .git
 /vendor
 /data
+/transmission
 *.dockerfile
 docker-compose.yaml

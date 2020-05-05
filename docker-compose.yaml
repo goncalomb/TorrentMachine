@@ -2,9 +2,7 @@ version: '3.7'
 
 services:
   www:
-    build:
-      context: ./
-      dockerfile: www.dockerfile
+    build: ./
     restart: always
     environment:
       - TM_TRANSMISSION_URL=http://transmission:9091/transmission/rpc
@@ -13,10 +11,9 @@ services:
     volumes:
       - ./data/downloads/:/root/www/files/
   transmission:
-    build:
-      context: ./
-      dockerfile: transmission.dockerfile
+    build: ./transmission/
     restart: always
     volumes:
       - ./data/transmission/:/root/.config/transmission-daemon/
-      - ./data/downloads/:/root/Downloads/
+      - ./data/downloads/:/root/downloads/
+      - ./data/downloads-partial/:/root/downloads-partial/
